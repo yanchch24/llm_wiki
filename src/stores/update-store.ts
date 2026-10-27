@@ -1,5 +1,6 @@
-import { create } from "zustand"
+﻿import { create } from "zustand"
 import type { UpdateStatus } from "@/lib/update-check"
+import { SHOW_UPDATE_AND_CHANGELOG } from "@/lib/local-build"
 
 /**
  * UI-side state for the update-check feature. Persistence (user-level
@@ -36,7 +37,7 @@ export const useUpdateStore = create<UpdateStoreState>((set) => ({
   lastResult: null,
   lastCheckedAt: null,
   dismissedVersion: null,
-  enabled: true,
+  enabled: SHOW_UPDATE_AND_CHANGELOG,
 
   setChecking: (checking) => set({ checking }),
   setResult: (lastResult, lastCheckedAt) =>
@@ -51,12 +52,13 @@ export const useUpdateStore = create<UpdateStoreState>((set) => ({
  * preference. Used by passive indicators (the red dot on the
  * Settings gear, the red dot next to the About row in Settings)
  * that should keep nudging the user toward the update — those
- * surfaces are the canonical "where do I find this" signposts,
+ * surfaces are the canonical "where to find this" signposts,
  * not pressure to act NOW.
  *
  * Returns true iff the latest check finished with kind="available".
  */
 export function hasAvailableUpdate(state: UpdateStoreState): boolean {
+  if (!SHOW_UPDATE_AND_CHANGELOG) return false
   if (!state.lastResult) return false
   return state.lastResult.kind === "available"
 }
@@ -74,6 +76,7 @@ export function hasAvailableUpdate(state: UpdateStoreState): boolean {
  * without hiding the way to the update.
  */
 export function shouldShowUpdateBanner(state: UpdateStoreState): boolean {
+  if (!SHOW_UPDATE_AND_CHANGELOG) return false
   if (!hasAvailableUpdate(state)) return false
   // `hasAvailableUpdate` already proved kind === "available", so we
   // can narrow safely here. Type-narrow inside the branch rather

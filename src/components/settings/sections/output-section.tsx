@@ -1,7 +1,8 @@
-import { useTranslation } from "react-i18next"
+﻿import { useTranslation } from "react-i18next"
 import { Label } from "@/components/ui/label"
 import type { SettingsDraft, DraftSetter } from "../settings-types"
 import { OUTPUT_LANGUAGE_OPTIONS as LANGUAGE_OPTIONS } from "@/lib/output-language-options"
+import { SHOW_LANGUAGE_CONTROLS } from "@/lib/local-build"
 
 interface Props {
   draft: SettingsDraft
@@ -21,6 +22,7 @@ export function OutputSection({ draft, setDraft }: Props) {
         </p>
       </div>
 
+      {SHOW_LANGUAGE_CONTROLS && (
       <div className="space-y-2">
         <Label>{t("settings.sections.output.aiLanguage")}</Label>
         <p className="text-xs text-muted-foreground">
@@ -38,6 +40,7 @@ export function OutputSection({ draft, setDraft }: Props) {
           ))}
         </select>
       </div>
+      )}
 
       <div className="space-y-2">
         <Label>{t("settings.sections.output.historyLength")}</Label>

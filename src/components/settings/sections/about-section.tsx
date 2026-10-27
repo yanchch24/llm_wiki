@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+﻿import { useEffect, useState, useCallback } from "react"
 import { Download, RefreshCw, CheckCircle2, Sparkles } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { openUrl } from "@tauri-apps/plugin-opener"
@@ -9,6 +9,7 @@ import { useUpdateStore, hasAvailableUpdate } from "@/stores/update-store"
 import { checkForUpdates, toLatestReleaseUrl } from "@/lib/update-check"
 import { saveUpdateCheckState } from "@/lib/project-store"
 import { useAppDialog } from "@/stores/app-dialog-store"
+import { SHOW_UPDATE_AND_CHANGELOG } from "@/lib/local-build"
 
 interface ApiHealth {
   enabled?: boolean
@@ -147,6 +148,7 @@ export function AboutSection() {
       </div>
 
       {/* ── Update check card ──────────────────────────────────── */}
+      {SHOW_UPDATE_AND_CHANGELOG && (
       <div className="space-y-3 rounded-md border p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -204,6 +206,7 @@ export function AboutSection() {
           {t("settings.sections.about.autoCheck")}
         </label>
       </div>
+      )}
 
       <div className="rounded-md border p-4 text-sm">
         <div className="font-medium">LLM Wiki</div>

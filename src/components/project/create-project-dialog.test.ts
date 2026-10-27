@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest"
+﻿import { describe, expect, it } from "vitest"
 import { getCreateProjectFormStatus } from "./create-project-dialog"
 
-describe("getCreateProjectFormStatus", () => {
+describe("create project form in the fixed-Chinese build", () => {
   it("keeps the initial disabled state quiet before the user interacts", () => {
     expect(getCreateProjectFormStatus("", "", "", "", false)).toEqual({
       missingRequired: true,
@@ -11,39 +11,30 @@ describe("getCreateProjectFormStatus", () => {
     })
   })
 
-  it("shows the required hint after interaction while fields are missing", () => {
-    expect(getCreateProjectFormStatus("Research", "", "", "", true)).toEqual({
-      missingRequired: true,
-      canCreate: false,
-      footerError: "",
-      footerMessageKey: "project.requiredHint",
-    })
-  })
-
-  it("treats whitespace-only names as missing", () => {
-    expect(getCreateProjectFormStatus("   ", "/Users/me", "Chinese", "", true)).toEqual({
-      missingRequired: true,
-      canCreate: false,
-      footerError: "",
-      footerMessageKey: "project.requiredHint",
-    })
-  })
-
-  it("treats whitespace-only paths as missing", () => {
-    expect(getCreateProjectFormStatus("Research", "   ", "Chinese", "", true)).toEqual({
-      missingRequired: true,
-      canCreate: false,
-      footerError: "",
-      footerMessageKey: "project.requiredHint",
-    })
-  })
-
-  it("enables creation when name, language, and parent directory are present", () => {
-    expect(getCreateProjectFormStatus("Research", "/Users/me", "Chinese", "", true)).toEqual({
+  it("does not require an AI output language selection", () => {
+    expect(getCreateProjectFormStatus("Research", "/Users/me", "", "", true)).toEqual({
       missingRequired: false,
       canCreate: true,
       footerError: "",
       footerMessageKey: null,
+    })
+  })
+
+  it("still treats a whitespace-only name as missing", () => {
+    expect(getCreateProjectFormStatus("   ", "/Users/me", "", "", true)).toEqual({
+      missingRequired: true,
+      canCreate: false,
+      footerError: "",
+      footerMessageKey: "project.requiredHint",
+    })
+  })
+
+  it("still treats a whitespace-only path as missing", () => {
+    expect(getCreateProjectFormStatus("Research", "   ", "", "", true)).toEqual({
+      missingRequired: true,
+      canCreate: false,
+      footerError: "",
+      footerMessageKey: "project.requiredHint",
     })
   })
 
@@ -56,17 +47,8 @@ describe("getCreateProjectFormStatus", () => {
     })
   })
 
-  it("keeps server errors visible even before interaction", () => {
-    expect(getCreateProjectFormStatus("", "", "", "Permission denied", false)).toEqual({
-      missingRequired: true,
-      canCreate: false,
-      footerError: "Permission denied",
-      footerMessageKey: null,
-    })
-  })
-
-  it("keeps creation enabled when fields are valid but a server error is present", () => {
-    expect(getCreateProjectFormStatus("Research", "/Users/me", "Chinese", "Permission denied", true)).toEqual({
+  it("keeps the form ready when only a server error is present", () => {
+    expect(getCreateProjectFormStatus("Research", "/Users/me", "", "Permission denied", true)).toEqual({
       missingRequired: false,
       canCreate: true,
       footerError: "Permission denied",

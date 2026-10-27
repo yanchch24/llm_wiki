@@ -1,8 +1,9 @@
-import { useTranslation } from "react-i18next"
+﻿import { useTranslation } from "react-i18next"
 import { Label } from "@/components/ui/label"
 import { Plus, Minus } from "lucide-react"
 import type { SettingsDraft, DraftSetter } from "../settings-types"
 import type { AppTheme } from "@/lib/theme"
+import { SHOW_LANGUAGE_CONTROLS } from "@/lib/local-build"
 import { useState, useEffect } from "react"
 import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL, ZOOM_STEP, clampZoomLevel, roundZoomLevel } from "@/stores/zoom-store"
 
@@ -58,6 +59,7 @@ export function InterfaceSection({ draft, setDraft, onThemeChange }: Props) {
         </p>
       </div>
 
+      {SHOW_LANGUAGE_CONTROLS && (
       <div className="space-y-2">
         <Label>{t("settings.sections.interface.uiLanguage")}</Label>
         <div className="flex flex-wrap gap-2">
@@ -83,6 +85,7 @@ export function InterfaceSection({ draft, setDraft, onThemeChange }: Props) {
           {t("settings.sections.interface.uiLanguageHint")}
         </p>
       </div>
+      )}
 
       <div className="space-y-2">
         <Label>{t("settings.sections.interface.theme")}</Label>

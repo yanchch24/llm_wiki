@@ -1,6 +1,7 @@
-import { load } from "@tauri-apps/plugin-store"
+﻿import { load } from "@tauri-apps/plugin-store"
 import type { WikiProject } from "@/types/wiki"
 import type { ApiConfig, CustomLlmPreset, GeneralConfig, LlmConfig, SearchApiConfig, EmbeddingConfig, MineruConfig, MultimodalConfig, OutputLanguage, ProjectLlmOverride, ProviderConfigs, ProxyConfig, ScheduledImportConfig, SourceWatchConfig, TaskModelRoutingConfig } from "@/stores/wiki-store"
+import { FIXED_OUTPUT_LANGUAGE, FIXED_UI_LANGUAGE } from "./local-build"
 import { normalizeSourceWatchConfig } from "@/lib/source-watch-config"
 import { normalizePath } from "@/lib/path-utils"
 import { DEFAULT_ZOOM_LEVEL, clampZoomLevel } from "@/stores/zoom-store"
@@ -383,13 +384,13 @@ export async function removeFromRecentProjects(
 const LANGUAGE_KEY = "language"
 
 export async function saveLanguage(lang: string): Promise<void> {
+  void lang
   const store = await getStore()
-  await store.set(LANGUAGE_KEY, lang)
+  await store.set(LANGUAGE_KEY, FIXED_UI_LANGUAGE)
 }
 
-export async function loadLanguage(): Promise<string | null> {
-  const store = await getStore()
-  return (await store.get<string>(LANGUAGE_KEY)) ?? null
+export async function loadLanguage(): Promise<string> {
+  return FIXED_UI_LANGUAGE
 }
 
 const THEME_KEY = "theme"
@@ -411,21 +412,19 @@ const SOURCE_WATCH_CONFIG_KEY = "sourceWatchConfig"
 const SOURCE_WATCH_ALL_PROJECTS_KEY = "sourceWatchAllProjects"
 
 export async function saveOutputLanguage(lang: OutputLanguage, projectId?: string): Promise<void> {
+  void lang
+  const effectiveLang = FIXED_OUTPUT_LANGUAGE
   const store = await getStore()
   if (projectId) {
     const existing = (await store.get<Record<string, OutputLanguage>>(PROJECT_OUTPUT_LANGUAGE_KEY)) ?? {}
-    await store.set(PROJECT_OUTPUT_LANGUAGE_KEY, { ...existing, [projectId]: lang })
+    await store.set(PROJECT_OUTPUT_LANGUAGE_KEY, { ...existing, [projectId]: effectiveLang })
   }
-  await store.set(OUTPUT_LANGUAGE_KEY, lang)
+  await store.set(OUTPUT_LANGUAGE_KEY, effectiveLang)
 }
 
-export async function loadOutputLanguage(projectId?: string): Promise<OutputLanguage | null> {
-  const store = await getStore()
-  if (projectId) {
-    const projectLanguages = await store.get<Record<string, OutputLanguage>>(PROJECT_OUTPUT_LANGUAGE_KEY)
-    return projectLanguages?.[projectId] ?? null
-  }
-  return (await store.get<OutputLanguage>(OUTPUT_LANGUAGE_KEY)) ?? null
+export async function loadOutputLanguage(projectId?: string): Promise<OutputLanguage> {
+  void projectId
+  return FIXED_OUTPUT_LANGUAGE
 }
 
 export async function saveProjectFileSyncEnabled(enabled: boolean, projectId?: string): Promise<void> {
@@ -499,18 +498,22 @@ export interface PersistedUpdateCheckState {
   dismissedVersion: string | null
 }
 
+const DISABLED_UPDATE_CHECK_STATE: PersistedUpdateCheckState = {
+  enabled: false,
+  lastCheckedAt: null,
+  dismissedVersion: null,
+}
+
 export async function saveUpdateCheckState(
   state: PersistedUpdateCheckState,
 ): Promise<void> {
+  void state
   const store = await getStore()
-  await store.set(UPDATE_CHECK_STATE_KEY, state)
+  await store.set(UPDATE_CHECK_STATE_KEY, DISABLED_UPDATE_CHECK_STATE)
 }
 
-export async function loadUpdateCheckState(): Promise<PersistedUpdateCheckState | null> {
-  const store = await getStore()
-  return (
-    (await store.get<PersistedUpdateCheckState>(UPDATE_CHECK_STATE_KEY)) ?? null
-  )
+export async function loadUpdateCheckState(): Promise<PersistedUpdateCheckState> {
+  return DISABLED_UPDATE_CHECK_STATE
 }
 
 const ZOOM_LEVEL_KEY = "zoomLevel"

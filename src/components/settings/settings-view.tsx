@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+﻿import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Bot,
   Binary,
@@ -26,6 +26,7 @@ import { useChatStore } from "@/stores/chat-store"
 import { useUpdateStore, hasAvailableUpdate } from "@/stores/update-store"
 import { useZoomStore } from "@/stores/zoom-store"
 import { clampUserConcurrency } from "@/lib/concurrency-limits"
+import { FIXED_OUTPUT_LANGUAGE, SHOW_UPDATE_AND_CHANGELOG } from "@/lib/local-build"
 import {
   loadSourceWatchAllProjects,
   loadSourceWatchConfig,
@@ -101,7 +102,7 @@ function initialDraft(
   llm: ReturnType<typeof useWikiStore.getState>["llmConfig"],
   embed: ReturnType<typeof useWikiStore.getState>["embeddingConfig"],
   multimodal: ReturnType<typeof useWikiStore.getState>["multimodalConfig"],
-  outputLanguage: ReturnType<typeof useWikiStore.getState>["outputLanguage"],
+  _outputLanguage: ReturnType<typeof useWikiStore.getState>["outputLanguage"],
   proxy: ReturnType<typeof useWikiStore.getState>["proxyConfig"],
   scheduledImport: ReturnType<typeof useWikiStore.getState>["scheduledImportConfig"],
   sourceWatch: ReturnType<typeof useWikiStore.getState>["sourceWatchConfig"],
@@ -160,7 +161,7 @@ function initialDraft(
     multimodalAzureModelFamily: multimodal.azureModelFamily ?? "auto",
     multimodalApiMode: multimodal.apiMode,
     multimodalConcurrency: clampUserConcurrency(multimodal.concurrency, 4),
-    outputLanguage,
+    outputLanguage: FIXED_OUTPUT_LANGUAGE,
     maxHistoryMessages,
     proxyEnabled: proxy.enabled,
     proxyUrl: proxy.url,
@@ -469,7 +470,7 @@ export function SettingsView() {
     setLlmConfig(newLlm)
     setEmbeddingConfig(newEmbed)
     setMultimodalConfig(newMultimodal)
-    setOutputLanguage(draft.outputLanguage as typeof outputLanguage)
+    setOutputLanguage(FIXED_OUTPUT_LANGUAGE)
     setProxyConfig(newProxy)
     setSourceWatchConfig(newSourceWatch)
     setSourceWatchAllProjects(draft.sourceWatchAllProjects)
@@ -484,7 +485,7 @@ export function SettingsView() {
       await saveLlmConfig(newLlm)
       await saveEmbeddingConfig(newEmbed)
       await saveMultimodalConfig(newMultimodal)
-      await saveOutputLanguage(draft.outputLanguage as typeof outputLanguage, project?.id)
+      await saveOutputLanguage(FIXED_OUTPUT_LANGUAGE, project?.id)
       await saveProxyConfig(newProxy)
       await saveSourceWatchConfig(newSourceWatch, project?.id)
       await saveSourceWatchAllProjects(draft.sourceWatchAllProjects)
@@ -704,7 +705,7 @@ export function SettingsView() {
           {t("settings.title")}
         </div>
         <nav className="flex-1 overflow-y-auto px-2 pb-3">
-          {CATEGORIES.map((c) => {
+          {CATEGORIES.filter((c) => SHOW_UPDATE_AND_CHANGELOG || c.id !== "changelog").map((c) => {
             const Icon = c.icon
             const isActive = c.id === active
             // Mirror the gear-icon dot inside the settings sidebar

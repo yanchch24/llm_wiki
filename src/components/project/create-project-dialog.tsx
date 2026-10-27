@@ -1,4 +1,4 @@
-import { useState } from "react"
+﻿import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { open } from "@tauri-apps/plugin-dialog"
 import {
@@ -13,8 +13,9 @@ import { getTemplate } from "@/lib/templates"
 import { TemplatePicker } from "@/components/project/template-picker"
 import type { WikiProject } from "@/types/wiki"
 import { normalizePath } from "@/lib/path-utils"
+import { FIXED_OUTPUT_LANGUAGE, SHOW_LANGUAGE_CONTROLS } from "@/lib/local-build"
 import { OUTPUT_LANGUAGE_OPTIONS } from "@/lib/output-language-options"
-import { useWikiStore, type OutputLanguage } from "@/stores/wiki-store"
+import { useWikiStore } from "@/stores/wiki-store"
 import { saveOutputLanguage } from "@/lib/project-store"
 
 interface CreateProjectDialogProps {
@@ -33,11 +34,11 @@ export interface CreateProjectFormStatus {
 export function getCreateProjectFormStatus(
   name: string,
   path: string,
-  language: string,
+  _language: string,
   error: string,
   hasInteracted: boolean,
 ): CreateProjectFormStatus {
-  const missingRequired = !name.trim() || !path.trim() || !language
+  const missingRequired = !name.trim() || !path.trim()
   return {
     missingRequired,
     canCreate: !missingRequired,
@@ -51,12 +52,10 @@ export function CreateProjectDialog({ open: isOpen, onOpenChange, onCreated }: C
   const [name, setName] = useState("")
   const [path, setPath] = useState("")
   const [selectedTemplate, setSelectedTemplate] = useState("general")
-  // Empty string = "user hasn't picked yet"; we validate this on
-  // submit so a fresh project never starts in implicit auto-detect
-  // mode. Once chosen, the value is one of OUTPUT_LANGUAGE_OPTIONS
-  // (`auto` is a valid explicit choice — the user is then opting
-  // INTO auto-detect rather than getting it by accident).
-  const [language, setLanguage] = useState<string>("")
+  // This personal build pins output language to Simplified Chinese.
+  // Keep the state shape for a small upstream-friendly diff; the selector
+  // is hidden by SHOW_LANGUAGE_CONTROLS.
+  const [language, setLanguage] = useState<string>(FIXED_OUTPUT_LANGUAGE)
   const [error, setError] = useState("")
   const [hasInteracted, setHasInteracted] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -72,7 +71,7 @@ export function CreateProjectDialog({ open: isOpen, onOpenChange, onCreated }: C
     setName("")
     setPath("")
     setSelectedTemplate("general")
-    setLanguage("")
+    setLanguage(FIXED_OUTPUT_LANGUAGE)
     setError("")
     setHasInteracted(false)
   }
@@ -104,11 +103,6 @@ export function CreateProjectDialog({ open: isOpen, onOpenChange, onCreated }: C
       setHasInteracted(true)
       return
     }
-    if (!language) {
-      setError(t("project.errorLanguageRequired"))
-      setHasInteracted(true)
-      return
-    }
     setCreating(true)
     setError("")
     try {
@@ -126,7 +120,7 @@ export function CreateProjectDialog({ open: isOpen, onOpenChange, onCreated }: C
       // mirror is what the rest of the app reads via
       // `getOutputLanguage()` — without this write the choice
       // wouldn't survive past the dialog closing.
-      const lang = language as OutputLanguage
+      const lang = FIXED_OUTPUT_LANGUAGE
       setOutputLanguage(lang)
       await saveOutputLanguage(lang, project.id)
 
@@ -161,6 +155,7 @@ export function CreateProjectDialog({ open: isOpen, onOpenChange, onCreated }: C
                 placeholder={t("project.namePlaceholder")}
               />
             </div>
+            {SHOW_LANGUAGE_CONTROLS && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="language">
                 {t("project.aiOutputLanguage")} <span className="text-destructive">{t("project.requiredMarker")}</span>
@@ -187,6 +182,7 @@ export function CreateProjectDialog({ open: isOpen, onOpenChange, onCreated }: C
                 {t("project.aiOutputLanguageHint")}
               </p>
             </div>
+            )}
             <div className="flex flex-col gap-2">
               <Label htmlFor="path">
                 {t("project.parentDir")} <span className="text-destructive">{t("project.requiredMarker")}</span>
