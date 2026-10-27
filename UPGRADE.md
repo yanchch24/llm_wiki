@@ -9,7 +9,7 @@
 2. **上游文件只留最小接入点**：一行 import + 一处条件判断，绝不删除上游代码。
 3. **自有新功能放在独立目录**（如 `src/custom/`），通过少量接入点挂载。
 4. **一类改动一个提交**，便于 rebase 时逐提交解决冲突。
-5. **不 rebase 已推送的提交**：日常在 feature 分支开发，完成后再合入 main。
+5. **不 rebase 已推送的提交**：日常在 si 分支上开发，测试全绿后由所有者决定合并到 main。
 
 ## 当前已有定制
 
@@ -19,13 +19,13 @@
 ## 升级步骤
 
 ```bash
-git checkout main
+git checkout si
 git fetch upstream --tags
-git log main..upstream/main --oneline   # 了解上游更新内容
+git log si..upstream/main --oneline   # 了解上游更新内容
 git rebase upstream/main
 npm run typecheck
 npm run test:mocks
-git push origin main --force-with-lease
+git push origin si --force-with-lease
 ```
 
 ## 冲突处理
